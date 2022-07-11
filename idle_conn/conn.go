@@ -40,7 +40,7 @@ func (ic *IdleConn[T]) UpdateIdleTime(t time.Time) {
 		tsRenew := tsNext.Add(IdleTimeout)
 		atomic.StoreInt64(&ic.LastTs, tsNext.Unix())
 
-		logger.Printf("获取到锁，且应该更新，oldTs: %+v, 更新超时时间: %+v\n", ic.LastTs, tsRenew)
+		logger.Printf("获取到锁,且应该更新, oldTs: %+v, 更新超时时间: %+v\n", ic.LastTs, tsRenew)
 		_ = ic.Conn.SetReadDeadline(tsRenew)
 		_ = ic.Conn.SetWriteDeadline(tsRenew)
 
