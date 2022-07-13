@@ -1,6 +1,7 @@
 package idle_conn
 
 import (
+	"github.com/panjf2000/ants/v2"
 	"log"
 	"net"
 	"sync"
@@ -8,9 +9,18 @@ import (
 	"time"
 )
 
-const IdleTimeout = 120 * time.Second
+const DefaultIdleTimeout = 20 * time.Second
 
-var logger = log.Default()
+var (
+	logger   = log.Default()
+	AntsPool *ants.Pool
+)
+
+func init() {
+	if AntsPool == nil {
+		AntsPool, _ = ants.NewPool(2000, ants.WithNonblocking(true))
+	}
+}
 
 type ValidConn interface {
 	net.Conn
@@ -26,7 +36,7 @@ type IdleConn[T ValidConn] struct {
 func NewIdleConn[T ValidConn](tt T) *IdleConn[T] {
 	p := &IdleConn[T]{
 		Conn:        tt,
-		IdleTimeout: IdleTimeout,
+		IdleTimeout: DefaultIdleTimeout,
 	}
 	return p
 }
@@ -42,12 +52,12 @@ func NewIdleConnWithIdleTimeOut[T ValidConn](tt T, idleTimeOut time.Duration) *I
 
 // Read data
 func (ic *IdleConn[T]) Read(buf []byte) (int, error) {
-	go ic.UpdateIdleTime(time.Now().Add(ic.IdleTimeout))
+	defer AntsPool.Submit(ic.UpdateIdleTime)
 	return ic.Conn.Read(buf)
 }
 
 // Update deadline
-func (ic *IdleConn[T]) UpdateIdleTime(t time.Time) {
+func (ic *IdleConn[T]) UpdateIdleTime() {
 	if ic.mt.TryLock() {
 		defer ic.mt.Unlock()
 
@@ -70,6 +80,7 @@ func (ic *IdleConn[T]) UpdateIdleTime(t time.Time) {
 
 // Write data
 func (ic *IdleConn[T]) Write(buf []byte) (int, error) {
-	go ic.UpdateIdleTime(time.Now().Add(IdleTimeout))
+
+	defer AntsPool.Submit(ic.UpdateIdleTime)
 	return ic.Conn.Write(buf)
 }
