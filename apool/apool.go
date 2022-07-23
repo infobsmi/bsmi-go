@@ -16,9 +16,8 @@ var (
 	GlobalTenIdleTimeOut = 10 * time.Second
 )
 
-/**
- * 初始化池子
- */
+// 初始化池子
+
 func InitAP() {
 	if AntsPool == nil {
 		AntsPool, _ = ants.NewPool(50000, ants.WithNonblocking(true),
@@ -26,9 +25,7 @@ func InitAP() {
 	}
 }
 
-/**
- * 初始化池子带参数
- */
+// 初始化池子带参数
 func InitAPWith(
 	size int,
 	isNonBlocking bool,
@@ -44,9 +41,8 @@ func InitAPWith(
 	}
 }
 
-/**
- * 获取池子实例
- */
+// 获取池子实例
+
 func GetAP() *ants.Pool {
 
 	if AntsPool.IsClosed() {
@@ -57,9 +53,7 @@ func GetAP() *ants.Pool {
 	return AntsPool
 }
 
-/**
- * 提交任务
- */
+// 提交任务
 func APSubmit(f func()) {
 	err := GetAP().Submit(f)
 	if err != nil {
@@ -67,9 +61,7 @@ func APSubmit(f func()) {
 	}
 }
 
-/**
- * 每隔6秒打印 池子动态
- */
+// 每隔6秒打印 池子动态
 func APStat() {
 	tk := time.NewTicker(6 * time.Second)
 	go func() {
