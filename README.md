@@ -15,3 +15,5 @@ bsmi golang library
  
 
 [RFC-2] [goroutine pool：引入缓存池提升gopool性能 #2](https://github.com/infobsmi/bsmi-go/issues/1)
+
+[RFC-4] [连接池：一个稳定可靠自动拨号的连接池 #4](https://github.com/infobsmi/bsmi-go/issues/4)
